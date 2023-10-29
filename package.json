@@ -14,7 +14,7 @@
   "contributes": {
     "commands": [{
       "command": "test-step-dias.search",
-      "title": "Hello World"
+      "title": "search"
     }]
   },
   "scripts": {
