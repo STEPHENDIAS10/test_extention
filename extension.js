@@ -1,6 +1,6 @@
 const vscode = require("vscode");
 const axios = require("axios");
-const xmlParser = require("fast-xml-parser");
+const xml2js = require("xml2js");
 const https = require("https");
 
 /**
@@ -9,40 +9,48 @@ const https = require("https");
 async function activate(context) {
   https.globalAgent.options.rejectUnauthorized = false;
   const res = await axios.get("https://blog.webdevsimplified.com/rss.xml");
+
   const xmlOptions = {
-    attributeNamePrefix: "",
-    ignoreAttributes: false,
-    parseNodeValue: true,
+    explicitArray: false, // Ensures that items are not wrapped in arrays
   };
-  const parsedData = xmlParser.parse(res.data, xmlOptions);
 
-  // Check if the RSS data structure matches what you expect
-  if (parsedData.rss && parsedData.rss.channel && parsedData.rss.channel.item) {
-    const articles = parsedData.rss.channel.item.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
-      .map(article => {
-        return {
-          label: article.title,
-          detail: article.description,
-          link: article.link,
-        };
-      });
+  const parser = new xml2js.Parser(xmlOptions);
+  const parseString = require("util").promisify(parser.parseString);
 
-    let disposable = vscode.commands.registerCommand(
-      "test-step-dias.search",
-      async function () {
-        const article = await vscode.window.showQuickPick(articles, {
-          matchOnDetail: true,
+  try {
+    const parsedData = await parseString(res.data);
+
+    // Access the RSS items
+    const items = parsedData.rss.channel.item;
+
+    if (items && Array.isArray(items)) {
+      const articles = items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+        .map(article => {
+          return {
+            label: article.title,
+            detail: article.description,
+            link: article.link,
+          };
         });
 
-        if (article == null) return;
+      let disposable = vscode.commands.registerCommand(
+        "test-step-dias.search",
+        async function () {
+          const article = await vscode.window.showQuickPick(articles, {
+            matchOnDetail: true,
+          });
 
-        vscode.env.openExternal(article.link);
-      }
-    );
+          if (article == null) return;
 
-    context.subscriptions.push(disposable);
-  } else {
-    console.error("Invalid RSS data structure.");
+          vscode.env.openExternal(article.link);
+        });
+
+      context.subscriptions.push(disposable);
+    } else {
+      console.error("Invalid RSS data structure.");
+    }
+  } catch (error) {
+    console.error("Error parsing XML:", error);
   }
 }
 
