@@ -9,9 +9,7 @@ const https = require("https")
 async function activate(context) {
   https.globalAgent.options.rejectUnauthorized = false
   const res = await axios.get("https://blog.webdevsimplified.com/rss.xml")
-  const articles = xmlParser
-    .parse(res.data)
-    .rss.channel.item.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+  const articles = xmlParser.parse(res.data).rss.channel.item.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
     .map(article => {
       return {
         label: article.title,
