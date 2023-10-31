@@ -1,6 +1,8 @@
 {
   "name": "test-step-dias",
   "displayName": "test_step_dias",
+  "publisher": "StephenSimonDias",
+  "repository": "https://github.com/STEPHENDIAS10/test_extention",
   "description": "",
   "version": "0.0.1",
   "engines": {

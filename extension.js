@@ -45,6 +45,27 @@ async function activate(context) {
           vscode.env.openExternal(article.link);
         });
 
+		// Add subword navigation commands
+		vscode.commands.registerTextEditorCommand("extension.selectSubwordRight", (textEditor, edit) => {
+			const selections = textEditor.selections;
+			textEditor.edit((editBuilder) => {
+			  selections.forEach((selection) => {
+				const newPosition = selection.active.translate(0, 1);
+				editBuilder.insert(newPosition, textEditor.document.getText(new vscode.Range(selection.active, newPosition)));
+			  });
+			});
+		  });
+	
+		  vscode.commands.registerTextEditorCommand("extension.selectSubwordLeft", (textEditor, edit) => {
+			const selections = textEditor.selections;
+			textEditor.edit((editBuilder) => {
+			  selections.forEach((selection) => {
+				const newPosition = selection.active.translate(0, -1);
+				editBuilder.insert(newPosition, textEditor.document.getText(new vscode.Range(newPosition, selection.active)));
+			  });
+			});
+		  });
+
       context.subscriptions.push(disposable);
     } else {
       console.error("Invalid RSS data structure.");
@@ -53,7 +74,6 @@ async function activate(context) {
     console.error("Error parsing XML:", error);
   }
 }
-
 exports.activate = activate;
 
 function deactivate() {}
@@ -62,3 +82,5 @@ module.exports = {
   activate,
   deactivate,
 };
+
+
