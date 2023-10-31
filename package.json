@@ -4,7 +4,7 @@
   "publisher": "StephenSimonDias",
   "repository": "https://github.com/STEPHENDIAS10/test_extention",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.83.0"
   },
